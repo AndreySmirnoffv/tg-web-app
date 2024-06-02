@@ -1,4 +1,6 @@
 const { prisma } = require('./logic')
+const textDb = require('../db/texts/texts.json')
+const fs = require('fs')
 
 async function waitForText(bot, chatId) {
     return new Promise((resolve) => {
@@ -17,7 +19,7 @@ async function addBalance(bot, msg) {
         await bot.sendMessage(msg.chat.id, "Пришлите мне имя пользователя, которому хотите добавить баланс");
         console.log("программа дальше не идет разбирайся почему гы )")
         console.log(msg.text)
-        const username = "hashfuck"
+        const username = await waitForText(bot, msg.from.username)
         console.log(`Имя пользователя: ${username}`);
 
         const user = await prisma.user.findUnique({
@@ -29,7 +31,7 @@ async function addBalance(bot, msg) {
             return;
         }
 
-        await msg.reply("Пришлите мне, сколько Ton хотите добавить");
+        await bot.sendMessage("Пришлите мне, сколько Ton хотите добавить");
         const balanceText = await waitForText(bot, ctx);
         const balance = parseInt(balanceText, 10);
 
@@ -55,7 +57,17 @@ async function addBalance(bot, msg) {
     }
 }
 
+async function addText(bot, msg){
+    const emptyArray = []
+    await bot.sendMessage(msg.chat.id, "Пришлите мне текст сообщения")
+    const message = await waitForText(bot, msg.from.username)
+    emptyArray.push({text: message.text})
+    fs.writeFileSync('./assets/db/texts/texts.json', JSON.stringify(emptyArray, null, '\t'))
+    await bot.sendMessage(msg.chat.id, "Текст был успешно добавлен")
+}
+
 
 module.exports = {
-    addBalance: addBalance
+    addBalance: addBalance,
+    addText: addText
 }

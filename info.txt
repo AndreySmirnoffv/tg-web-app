@@ -1,0 +1,2 @@
+height: 468px + 61 px header height
+width: 560px
